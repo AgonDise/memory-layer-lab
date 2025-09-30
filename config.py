@@ -18,9 +18,19 @@ MEMORY_CONFIG = {
 
 # LLM Configuration
 LLM_CONFIG = {
-    'api_key': os.getenv('LLM_API_KEY', ''),
-    'model': 'gpt-3.5-turbo',
-    'temperature': 0.7,
+    'provider': 'openai',
+    'openai': {
+        'api_key': os.getenv('OPENAI_API_KEY', ''),  # Get from environment
+        'model': 'gpt-3.5-turbo',
+        'temperature': 0.7,
+    },
+    'anthropic': {
+        'api_key': os.getenv('ANTHROPIC_API_KEY', ''),
+        'model': 'claude-2',
+    },
+    'mock': {
+        'enabled': False,
+    }
 }
 
 # Database Configuration

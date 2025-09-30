@@ -6,6 +6,14 @@ This demonstrates the full memory layer system with LLM API.
 """
 
 import os
+import json
+import time
+from typing import Dict, Any, List, Optional
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
+
 import sys
 from config import get_config
 from utils import FakeEmbeddingGenerator, get_llm_client

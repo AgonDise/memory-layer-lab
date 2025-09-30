@@ -14,6 +14,10 @@ import os
 from datetime import datetime
 from typing import List, Tuple, Dict, Any
 import json
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
 
 from config import get_config
 from utils import FakeEmbeddingGenerator, get_llm_client
