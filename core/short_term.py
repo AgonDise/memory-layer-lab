@@ -35,24 +35,59 @@ class ShortTermMemory:
             'role': role,
             'content': content,
             'timestamp': datetime.utcnow().isoformat(),
-            'metadata': metadata or {}
         }
         
         self.messages.append(message)
         self._enforce_limits()
     
-    def get_recent(self, n: Optional[int] = None) -> List[Dict[str, Any]]:
+    def get_recent(self, n: Optional[int] = None, query_embedding: Optional[List[float]] = None) -> List[Dict[str, Any]]:
         """
-        Get the most recent messages.
+        Get the most recent messages, optionally filtered by similarity.
         
         Args:
-            n: Number of messages to return. If None, return all.
+            n: Number of messages to retrieve (None = all)
+            query_embedding: Optional query embedding for semantic filtering
             
         Returns:
-            List of message dictionaries, most recent last.
+            List of recent messages
         """
-        self._clean_expired()
-        return self.messages[-(n or len(self.messages)):]
+        if query_embedding is not None:
+            # Semantic search: rank by similarity
+            messages_with_scores = []
+            for msg in self.messages:
+                msg_embedding = msg.get('embedding', [])
+                if msg_embedding:
+                    similarity = self._cosine_similarity(query_embedding, msg_embedding)
+                    msg_copy = msg.copy()
+                    msg_copy['similarity'] = similarity
+                    messages_with_scores.append(msg_copy)
+            
+            # Sort by similarity
+            messages_with_scores.sort(key=lambda x: x['similarity'], reverse=True)
+            
+            if n is None:
+                return messages_with_scores
+            return messages_with_scores[:n] if n > 0 else []
+        else:
+            # Time-based: most recent
+            if n is None:
+                return self.messages.copy()
+            return self.messages[-n:] if n > 0 else []
+    
+    def _cosine_similarity(self, vec1: List[float], vec2: List[float]) -> float:
+        """Calculate cosine similarity between two vectors."""
+        import numpy as np
+        arr1 = np.array(vec1)
+        arr2 = np.array(vec2)
+        
+        dot_product = np.dot(arr1, arr2)
+        norm1 = np.linalg.norm(arr1)
+        norm2 = np.linalg.norm(arr2)
+        
+        if norm1 == 0 or norm2 == 0:
+            return 0.0
+        
+        return float(dot_product / (norm1 * norm2))
     
     def search_by_embedding(self, query_embedding: List[float], top_k: int = 5) -> List[Dict[str, Any]]:
         """

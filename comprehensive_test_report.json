@@ -1,0 +1,230 @@
+{
+  "timestamp": "2025-09-30T16:33:47.639197",
+  "summary": {
+    "stm_tests": 1,
+    "mtm_tests": 1,
+    "ltm_tests": 1,
+    "integration_tests": 1
+  },
+  "detailed_results": {
+    "stm_tests": [
+      {
+        "total_messages": 99,
+        "added_count": 19,
+        "retrieval_tests": [
+          {
+            "query": "Tôi là ai?",
+            "retrieved_count": 5,
+            "time": 3.1948089599609375e-05
+          },
+          {
+            "query": "Tôi làm nghề gì?",
+            "retrieved_count": 5,
+            "time": 2.86102294921875e-06
+          },
+          {
+            "query": "Hướng dẫn nấu gà chiên",
+            "retrieved_count": 5,
+            "time": 9.5367431640625e-07
+          },
+          {
+            "query": "OpenAI API",
+            "retrieved_count": 5,
+            "time": 0.0
+          },
+          {
+            "query": "Valorant",
+            "retrieved_count": 5,
+            "time": 9.5367431640625e-07
+          }
+        ],
+        "performance": [
+          0.03339099884033203,
+          0.000102996826171875,
+          5.984306335449219e-05,
+          6.413459777832031e-05,
+          5.1975250244140625e-05,
+          6.508827209472656e-05,
+          4.887580871582031e-05,
+          5.412101745605469e-05,
+          5.030632019042969e-05,
+          5.1975250244140625e-05,
+          5.2928924560546875e-05,
+          5.5789947509765625e-05,
+          5.1975250244140625e-05,
+          5.602836608886719e-05,
+          5.0067901611328125e-06,
+          5.698204040527344e-05,
+          7.605552673339844e-05,
+          7.390975952148438e-05,
+          0.0006489753723144531
+        ]
+      }
+    ],
+    "mtm_tests": [
+      {
+        "total_messages": 99,
+        "chunks_created": 6,
+        "summarization_tests": [],
+        "retrieval_tests": [
+          {
+            "query": "AI Engineer",
+            "retrieved_count": 3,
+            "time": 1.9073486328125e-06
+          },
+          {
+            "query": "đầu bếp Sasukekeke",
+            "retrieved_count": 3,
+            "time": 9.5367431640625e-07
+          },
+          {
+            "query": "Cognee AI chatbot",
+            "retrieved_count": 3,
+            "time": 0.0
+          },
+          {
+            "query": "món ăn Nhật Bản",
+            "retrieved_count": 3,
+            "time": 9.5367431640625e-07
+          }
+        ],
+        "performance": [
+          0.0004019737243652344,
+          2.6226043701171875e-05,
+          1.6927719116210938e-05,
+          1.1920928955078125e-05,
+          9.703636169433594e-05,
+          1.2159347534179688e-05
+        ]
+      }
+    ],
+    "ltm_tests": [
+      {
+        "enabled": false,
+        "status": "placeholder"
+      }
+    ],
+    "integration_tests": [
+      {
+        "context_retrieval_tests": [
+          {
+            "query": "Tôi là ai?",
+            "stm_count": 5,
+            "mtm_count": 3,
+            "compressed_items": 6,
+            "original_items": 8,
+            "compression_ratio": 0.6875,
+            "relevance_score": 0.0,
+            "time": 0.0002701282501220703
+          },
+          {
+            "query": "Hướng dẫn tôi nấu món gà chiên",
+            "stm_count": 5,
+            "mtm_count": 3,
+            "compressed_items": 6,
+            "original_items": 8,
+            "compression_ratio": 0.6875,
+            "relevance_score": 0.3333333333333333,
+            "time": 0.0002200603485107422
+          },
+          {
+            "query": "OpenAI API trong Python",
+            "stm_count": 5,
+            "mtm_count": 3,
+            "compressed_items": 6,
+            "original_items": 8,
+            "compression_ratio": 0.6875,
+            "relevance_score": 0.0,
+            "time": 0.0002040863037109375
+          },
+          {
+            "query": "Valorant agents",
+            "stm_count": 5,
+            "mtm_count": 3,
+            "compressed_items": 6,
+            "original_items": 8,
+            "compression_ratio": 0.6875,
+            "relevance_score": 0.0,
+            "time": 0.0002009868621826172
+          }
+        ],
+        "aggregation_tests": [],
+        "compression_tests": []
+      }
+    ],
+    "performance_metrics": [],
+    "memory_retrieval_analysis": [
+      {
+        "total_queries": 4,
+        "avg_relevance_score": 0.08333333333333333,
+        "avg_stm_hits": 5,
+        "avg_mtm_hits": 3,
+        "avg_retrieval_time": 0.0002238154411315918,
+        "retrieval_details": [
+          {
+            "relevance": 0.0,
+            "stm_count": 5,
+            "mtm_count": 3,
+            "time": 0.0002701282501220703,
+            "query": "Tôi là ai?"
+          },
+          {
+            "relevance": 0.3333333333333333,
+            "stm_count": 5,
+            "mtm_count": 3,
+            "time": 0.0002200603485107422,
+            "query": "Hướng dẫn tôi nấu món gà chiên"
+          },
+          {
+            "relevance": 0.0,
+            "stm_count": 5,
+            "mtm_count": 3,
+            "time": 0.0002040863037109375,
+            "query": "OpenAI API trong Python"
+          },
+          {
+            "relevance": 0.0,
+            "stm_count": 5,
+            "mtm_count": 3,
+            "time": 0.0002009868621826172,
+            "query": "Valorant agents"
+          }
+        ]
+      }
+    ],
+    "compression_analysis": [
+      {
+        "total_tests": 4,
+        "avg_compression_ratio": 0.6875,
+        "avg_original_items": 8,
+        "avg_compressed_items": 6,
+        "compression_details": [
+          {
+            "original": 8,
+            "compressed": 6,
+            "ratio": 0.6875,
+            "query": "Tôi là ai?"
+          },
+          {
+            "original": 8,
+            "compressed": 6,
+            "ratio": 0.6875,
+            "query": "Hướng dẫn tôi nấu món gà chiên"
+          },
+          {
+            "original": 8,
+            "compressed": 6,
+            "ratio": 0.6875,
+            "query": "OpenAI API trong Python"
+          },
+          {
+            "original": 8,
+            "compressed": 6,
+            "ratio": 0.6875,
+            "query": "Valorant agents"
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -6,6 +6,10 @@ pyyaml>=6.0.1
 # UI & Visualization
 gradio>=5.0.0
 
+# Semantic Search & Embeddings
+sentence-transformers>=2.2.2
+scikit-learn>=1.0.0
+
 # Neo4j support
 neo4j>=5.14.0  # Neo4j driver for temporal and knowledge graphs
 
