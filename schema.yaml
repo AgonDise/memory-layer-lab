@@ -1,0 +1,80 @@
+short_term:
+  - id: "msg_001"
+    role: "user"              # user | assistant | system
+    content: "Hãy phân tích hàm login_user trong file auth_service.py"
+    token_count: 12
+    timestamp: "2025-09-27T10:00:00Z"
+
+  - id: "msg_002"
+    role: "assistant"
+    content: "Hàm login_user xử lý xác thực, tạo JWT token..."
+    token_count: 18
+    timestamp: "2025-09-27T10:00:10Z"
+
+# Schema documentation:
+# id: string, role: string, content: string, token_count: int, timestamp: ISO8601
+
+mid_term:
+  - id: "conv_001"
+    text: "File auth_service.py có commit gần đây sửa login_user."
+    embedding: [0.12, 0.33, -0.11, ...]   # float array
+    metadata:
+      file: "auth_service.py"
+      function: "login_user"
+      source: "conversation"
+      timestamp: "2025-09-20T10:15:00Z"
+
+# Schema documentation:
+# id: string, text: string, embedding: float[], metadata: {file, function, source, commit?, timestamp}
+
+long_term:
+  graph:
+    nodes:
+      - id: "f1"
+        label: "Function"
+        name: "login_user"
+      - id: "c1"
+        label: "Class"
+        name: "UserManager"
+      - id: "g1"
+        label: "Commit"
+        hash: "abc123"
+        message: "Fix bug in login_user"
+        timestamp: "2025-09-18T08:30:00Z"
+    edges:
+      - from: "c1"
+        to: "f1"
+        type: "HAS_FUNCTION"
+      - from: "g1"
+        to: "f1"
+        type: "MODIFIES"
+
+  # Schema documentation:
+  # nodes:
+  #   - id: string
+  #     label: string (Function | Class | Module | Commit | Doc)
+  # edges:
+  #   - from: string, to: string, type: string
+
+long_term:
+  vector:
+    - id: "kb_001"
+      text: "Spec của Innocody Engine: Short-term dùng sliding buffer..."
+      embedding: [0.12, 0.88, -0.33, ...]
+      metadata:
+        source: "documentation"
+        topic: "memory_layer"
+        timestamp: "2025-09-10T09:00:00Z"
+
+    - id: "conv_010"
+      text: "Trong commit abc123, login_user được sửa để thêm OAuth2."
+      embedding: [0.33, 0.22, -0.41, ...]
+      metadata:
+        source: "conversation"
+        file: "auth_service.py"
+        function: "login_user"
+        commit: "abc123"
+        timestamp: "2025-09-20T10:15:00Z"
+
+# Schema documentation:
+# id: string, text: string, embedding: float[], metadata: {source, file?, function?, commit?, topic?, timestamp}

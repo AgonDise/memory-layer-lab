@@ -1,0 +1,32 @@
+# Core dependencies
+numpy>=1.24.0
+python-dateutil>=2.8.2
+pyyaml>=6.0.1
+
+# UI & Visualization
+gradio>=5.0.0
+
+# Neo4j support
+neo4j>=5.14.0  # Neo4j driver for temporal and knowledge graphs
+
+# Vector Database (choose one or more)
+faiss-cpu>=1.7.4  # FAISS for CPU (recommended for development)
+# faiss-gpu>=1.7.4  # FAISS for GPU (production)
+# chromadb>=0.4.0  # ChromaDB alternative
+# qdrant-client>=1.6.0  # Qdrant alternative
+# weaviate-client>=3.24.0  # Weaviate alternative
+
+# Optional: LLM APIs
+# openai>=1.0.0
+# anthropic>=0.7.0
+
+# Optional: Traditional Database support
+# psycopg2-binary>=2.9.0  # PostgreSQL
+# pymongo>=4.0.0          # MongoDB
+
+# Development dependencies
+pytest>=7.4.0
+pytest-cov>=4.1.0
+black>=23.0.0
+flake8>=6.0.0
+mypy>=1.5.0
