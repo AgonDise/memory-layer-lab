@@ -1,4 +1,6 @@
 from typing import List, Dict, Any, Optional
+import time
+import logging
 from .short_term import ShortTermMemory
 from .mid_term import MidTermMemory
 from .long_term import LongTermMemory
@@ -6,6 +8,16 @@ from .summarizer import Summarizer
 from .preprocessor import InputPreprocessor
 from .aggregator import MemoryAggregator
 from .compressor import ContextCompressor
+
+# Langfuse integration (optional)
+try:
+    from utils.langfuse_client import create_langfuse_client, LangfuseTracer
+    from utils.config_manager import get_config
+    LANGFUSE_AVAILABLE = True
+except ImportError:
+    LANGFUSE_AVAILABLE = False
+
+logger = logging.getLogger(__name__)
 
 class MemoryOrchestrator:
     """
@@ -25,7 +37,8 @@ class MemoryOrchestrator:
                  preprocessor: Optional[InputPreprocessor] = None,
                  aggregator: Optional[MemoryAggregator] = None,
                  compressor: Optional[ContextCompressor] = None,
-                 summarize_every: int = 5):
+                 summarize_every: int = 5,
+                 enable_tracing: bool = False):
         """
         Initialize the memory orchestrator.
         
@@ -38,6 +51,7 @@ class MemoryOrchestrator:
             aggregator: Memory aggregator (optional)
             compressor: Context compressor (optional)
             summarize_every: Number of messages before triggering summarization
+            enable_tracing: Enable Langfuse tracing
         """
         self.short_term = short_term
         self.mid_term = mid_term
@@ -48,6 +62,24 @@ class MemoryOrchestrator:
         self.compressor = compressor or ContextCompressor()
         self.summarize_every = summarize_every
         self.message_count = 0
+        
+        # Langfuse tracing setup
+        self.tracing_enabled = enable_tracing and LANGFUSE_AVAILABLE
+        self.langfuse_client = None
+        self.tracer = None
+        
+        if self.tracing_enabled:
+            try:
+                config = get_config()
+                if config.get('langfuse.enabled', False):
+                    self.langfuse_client = create_langfuse_client()
+                    self.tracer = LangfuseTracer(self.langfuse_client)
+                    logger.info("✅ Langfuse tracing enabled in orchestrator")
+                else:
+                    self.tracing_enabled = False
+            except Exception as e:
+                logger.warning(f"Failed to initialize Langfuse: {e}")
+                self.tracing_enabled = False
     
     def add_message(self, role: str, content: str, **metadata) -> None:
         """
@@ -58,6 +90,20 @@ class MemoryOrchestrator:
             content: The message content
             **metadata: Additional metadata
         """
+        start_time = time.time()
+        
+        # Trace if enabled
+        if self.tracing_enabled and self.langfuse_client:
+            self.langfuse_client.log_event(
+                trace_id="current",
+                name="add_message",
+                metadata={
+                    "role": role,
+                    "content_length": len(content),
+                    "metadata": metadata
+                }
+            )
+        
         # Add to short-term memory
         self.short_term.add(role, content, **metadata)
         self.message_count += 1
@@ -66,6 +112,11 @@ class MemoryOrchestrator:
         if self.message_count >= self.summarize_every:
             self._summarize_and_move()
             self.message_count = 0
+        
+        # Log timing
+        if self.tracing_enabled:
+            duration = time.time() - start_time
+            logger.debug(f"add_message took {duration*1000:.2f}ms")
     
     def get_context(self, 
                     query: Optional[str] = None,
@@ -84,6 +135,20 @@ class MemoryOrchestrator:
         Returns:
             Dictionary with context from all memory layers
         """
+        start_time = time.time()
+        
+        # Trace context retrieval
+        if self.tracing_enabled and self.tracer:
+            with self.tracer.trace_context("get_context", metadata={
+                "query": query[:100] if query else None,
+                "use_embedding_search": use_embedding_search
+            }):
+                return self._get_context_internal(query, n_recent, n_chunks, use_embedding_search, start_time)
+        else:
+            return self._get_context_internal(query, n_recent, n_chunks, use_embedding_search, start_time)
+    
+    def _get_context_internal(self, query, n_recent, n_chunks, use_embedding_search, start_time):
+        """Internal context retrieval logic."""
         query_embedding = None
         
         # Preprocess query if provided
@@ -92,23 +157,46 @@ class MemoryOrchestrator:
             query_embedding = query_obj['embedding']
         
         # Retrieve from memory layers
+        retrieval_start = time.time()
         if use_embedding_search and query_embedding:
             stm_context = self.short_term.search_by_embedding(query_embedding, top_k=n_recent or 5)
             mtm_context = self.mid_term.search_by_embedding(query_embedding, top_k=n_chunks or 3)
         else:
             stm_context = self.short_term.get_recent(n_recent)
             mtm_context = self.mid_term.get_recent_chunks(n_chunks)
+        retrieval_time = time.time() - retrieval_start
         
         # Aggregate contexts
+        agg_start = time.time()
         aggregated = self.aggregator.aggregate(
             stm_context=stm_context,
             mtm_context=mtm_context,
             ltm_context=None,
             query_embedding=query_embedding
         )
+        agg_time = time.time() - agg_start
         
         # Compress context
+        comp_start = time.time()
         compressed = self.compressor.compress(aggregated)
+        comp_time = time.time() - comp_start
+        
+        total_time = time.time() - start_time
+        
+        # Log timing
+        if self.tracing_enabled and self.langfuse_client:
+            self.langfuse_client.log_span(
+                trace_id="current",
+                name="context_retrieval",
+                metadata={
+                    "retrieval_time_ms": retrieval_time * 1000,
+                    "aggregation_time_ms": agg_time * 1000,
+                    "compression_time_ms": comp_time * 1000,
+                    "total_time_ms": total_time * 1000,
+                    "stm_count": aggregated['stm_count'],
+                    "mtm_count": aggregated['mtm_count']
+                }
+            )
         
         return {
             'aggregated': aggregated,
@@ -116,6 +204,12 @@ class MemoryOrchestrator:
             'query_embedding': query_embedding,
             'stm_count': aggregated['stm_count'],
             'mtm_count': aggregated['mtm_count'],
+            'timing': {
+                'retrieval_ms': retrieval_time * 1000,
+                'aggregation_ms': agg_time * 1000,
+                'compression_ms': comp_time * 1000,
+                'total_ms': total_time * 1000
+            }
         }
     
     def get_context_string(self, 

@@ -1,10 +1,15 @@
-# Memory Layer Lab
+# 🧠 Memory Layer Lab
 
-A modular chatbot system with configurable memory layers (short-term, mid-term, and long-term) for managing conversation context.
+**Experimental chatbot with multi-layer memory system**
 
-**NEW**: Enhanced with **Neo4j graph databases** and **Vector DB** for advanced memory management!
+A modular, configurable chatbot with:
+- 🔄 Multi-layer memory (STM, MTM, LTM)
+- 🔍 Semantic search with embeddings
+- 📊 Langfuse tracing & observability
+- 🗄️ Neo4j support (optional)
+- 🎛️ Easy configuration via UI
 
-**✅ STATUS: FULLY OPERATIONAL** - All tests passing, examples working, ready to use!
+**✅ STATUS: Ready for experimentation!**
 
 ## Project Structure
 
@@ -51,114 +56,137 @@ memory_layer_lab/
     └── storage.py         # Storage utilities (file/DB)
 ```
 
-## Setup
-
-1. Clone the repository
-2. Install dependencies: `pip install -r requirements.txt`
-3. Configure your settings in `config.py`
-4. Run the chatbot: `python main.py`
-
-### Quick Start
+## 🚀 Quick Start
 
 ```bash
-# Install dependencies
+# 1. Install dependencies
 pip install -r requirements.txt
 
-# Optional: Start Neo4j (for graph features)
-docker-compose up -d neo4j
+# 2. (Optional) Install semantic search
+pip install sentence-transformers scikit-learn
 
-# Run simple tests
-python test_simple.py
+# 3. (Optional) Install Langfuse for tracing
+pip install langfuse
 
-# Run workflow demo
-python demo_workflow.py
-
-# Run Neo4j demo (works without Neo4j in mock mode)
-python demo_neo4j.py
-
-# Populate data from schema.yaml
-python populate_from_schema.py
-
-# Quick embedding example
-python example_embedding_usage.py
-
-# Run interactive chatbot
+# 4. Run chatbot
 python main.py
+
+# 5. (Optional) Launch config UI
+python config_ui.py  # http://localhost:7861
 ```
 
-## Configuration
+## ⚙️ Configuration
 
-Edit `config.py` to configure:
-- **Memory layer sizes**: Control how many messages/chunks each layer stores
-- **Database connections**: Configure SQLite, PostgreSQL, or MongoDB
-- **API keys**: Add your LLM API keys (OpenAI, Anthropic, etc.)
-- **Logging preferences**: Set log level and output format
-
-## Features
-
-### Memory Layers
-
-1. **Short-term Memory**
-   - Stores recent messages (default: 10)
-   - Has TTL (time-to-live) for automatic cleanup
-   - Fast access for immediate context
-
-2. **Mid-term Memory** (Enhanced with Neo4j)
-   - Stores summarized conversation chunks (default: 100)
-   - **NEW: Temporal Graph** - Commit timeline with Neo4j
-   - **NEW: Knowledge Graph** - Code relationships (functions, classes, modules)
-   - Automatically summarizes when short-term fills up
-   - Query code history and relationships
-
-3. **Long-term Memory** (Enhanced with Neo4j + Vector DB)
-   - **NEW: Knowledge Graph** - Design docs, domain concepts with Neo4j
-   - **NEW: Vector Database** - Semantic search with FAISS/ChromaDB
-   - Persistent knowledge across sessions
-   - Concept hierarchy and relationships
-   - Document similarity search
-
-### Response Modes
-
-- **Mock Mode**: For testing without API costs
-- **LLM Mode**: Integration with OpenAI, Anthropic, etc. (TODO)
-- **Rule-based Mode**: Simple keyword matching
-
-## Usage
-
-### Basic Usage
-
+### Via Config UI (Recommended)
 ```bash
-# Run the chatbot in interactive mode
-python main.py
+python config_ui.py  # http://localhost:7861
+```
+Adjust parameters via web interface:
+- Compression settings
+- Memory layer sizes
+- Semantic search thresholds
+- LLM parameters
+
+### Via Config File
+Edit `config/system_config.yaml`:
+```yaml
+compression:
+  strategy: "score_based"  # or mmr, truncate
+  max_tokens: 1000
+  
+semantic_search:
+  enabled: true
+  similarity_threshold: 0.6
+  
+response_generation:
+  model: "gpt-4o-mini"
+  temperature: 0.7
 ```
 
-### Interactive Commands
+### Langfuse Tracing (Optional)
+1. Get API keys from https://cloud.langfuse.com
+2. Edit `config/langfuse_config.yaml`
+3. Set `langfuse.enabled: true` in system_config.yaml
 
-- **Regular chat**: Just type your message
-- **`stats`**: View conversation statistics
-- **`reset`**: Clear all memory
-- **`quit` / `exit`**: Save and exit
+### Neo4j (Optional)
+1. Install Neo4j
+2. Edit `config/neo4j_config.yaml`
+3. Run `python test_neo4j_connection.py`
 
-### Example Session
+## ✨ Features
 
+### 🧠 Memory Layers
+- **STM**: Recent messages (default: 10)
+- **MTM**: Summarized chunks (default: 100)
+- **LTM**: Long-term facts with Neo4j support
+
+### 🔍 Semantic Search
+- Real embeddings with sentence-transformers
+- Cosine similarity ranking
+- Top-K retrieval from each layer
+
+### 🗜️ Context Compression
+- Multiple strategies (score-based, MMR, truncate)
+- Configurable weights (importance, recency, relevance)
+- Token budget management
+### 📊 Observability
+- Langfuse integration for tracing
+- Performance metrics
+- LLM call tracking
+
+## 💻 Usage Examples
+
+### Run Tests
+```bash
+# Generate embedded test data
+python generate_embedded_data.py
+
+# Test semantic search
+python test_semantic_search.py
+
+# Test Neo4j connection
+python test_neo4j_connection.py
+
+# Run comprehensive tests
+python test_comprehensive.py
 ```
-You: Hello! What can you do?
-MemoryBot: Hello! How can I help you today?
 
-You: Tell me about Python
-MemoryBot: That's interesting! Regarding 'Tell me about Python', here's what I think...
+### Adjust Config Programmatically
+```python
+from utils.config_manager import get_config
 
-You: stats
---- Conversation Statistics ---
-Bot Name: MemoryBot
-Short-term messages: 4
-Mid-term chunks: 0
--------------------------------
+config = get_config()
+
+# Get value
+max_tokens = config.get("compression.max_tokens")
+
+# Set value
+config.set("compression.max_tokens", 2000, save=True)
+
+# Update multiple
+config.update({
+    "compression.strategy": "mmr",
+    "semantic_search.top_k_stm": 10
+}, save=True)
 ```
 
-## Architecture
+### Use Langfuse Tracing
+```python
+from utils.langfuse_client import create_langfuse_client, LangfuseTracer
 
-### Advanced Workflow (Implemented)
+client = create_langfuse_client()
+tracer = LangfuseTracer(client)
+
+@tracer.trace_llm_call(model="gpt-4")
+def generate_response(prompt):
+    return llm.generate(prompt)
+
+# Auto-traced!
+response = generate_response("Hello")
+client.flush()
+```
+
+## 🏗️ Architecture
 
 ```mermaid
 flowchart TD
@@ -179,68 +207,54 @@ flowchart TD
     J --> |formatted response| K[Final Output]
 ```
 
-### Workflow Steps
+## 📂 Key Files
 
-1. **Input Preprocessing**
-   - Normalize text
-   - Detect intent (code_search, debug, documentation, etc.)
-   - Generate embeddings (mock or real model)
-   - Extract keywords
+**Core:**
+- `core/orchestrator.py` - Memory orchestration
+- `core/compressor.py` - Context compression
+- `core/aggregator.py` - Multi-layer aggregation
 
-2. **Memory Retrieval**
-   - STM: Recent messages with embedding similarity search
-   - MTM: Summarized chunks with relevance scoring
-   - LTM: Long-term knowledge (placeholder)
+**Configuration:**
+- `config/system_config.yaml` - Main config (200+ parameters)
+- `config_ui.py` - Web UI for config adjustment
+- `utils/config_manager.py` - Config management
 
-3. **Context Aggregation**
-   - Merge contexts from all layers
-   - Deduplicate similar items
-   - Rank by relevance scores (weighted by layer importance)
+**Tracing:**
+- `utils/langfuse_client.py` - Langfuse integration
+- `examples/langfuse_example.py` - Usage examples
 
-4. **Context Compression**
-   - Fit context within token budget
-   - Preserve most important items
-   - Use strategies: truncation, score-based, MMR
+**Testing:**
+- `test_semantic_search.py` - Semantic search tests
+- `test_comprehensive.py` - Full system tests
+- `generate_embedded_data.py` - Test data generation
 
-5. **Response Generation**
-   - Generate response with compressed context
-   - Post-process and format
-   - Add metadata and citations
+## 📚 Documentation
 
-## Development
+**Essential Guides:**
+- This README - Quick start & overview
+- `config/system_config.yaml` - All configurable parameters (with comments)
 
-### Running Tests
+**Setup Guides (if needed):**
+- Neo4j: Run `python test_neo4j_connection.py` for help
+- Langfuse: Edit `config/langfuse_config.yaml.example`
 
-```bash
-# Install dev dependencies
-pip install -r requirements.txt
+## 🔬 Experimentation
 
-# Run tests (when implemented)
-pytest tests/
+This is a **lab project** for testing different memory strategies:
 
-# Type checking
-mypy .
+```python
+# Try different compression strategies
+for strategy in ["score_based", "mmr", "truncate"]:
+    config.set("compression.strategy", strategy, save=True)
+    results = run_tests()
+    print(f"{strategy}: {results}")
 
-# Code formatting
-black .
+# Find optimal weights
+for imp_weight in [0.3, 0.4, 0.5, 0.6]:
+    config.set("compression.importance_weight", imp_weight, save=True)
+    # Adjust other weights...
+    results = run_tests()
 ```
-
-### Extending the System
-
-1. **Custom Summarizer**: Implement new summarization strategies in `core/summarizer.py`
-2. **LLM Integration**: Add API calls in `bot/response.py`
-3. **Database Support**: Extend `utils/storage.py` for different databases
-4. **Long-term Memory**: Implement vector search in `core/long_term.py`
-
-## Future Enhancements
-
-- [ ] LLM integration (OpenAI, Anthropic)
-- [ ] Vector database for semantic search
-- [ ] Web interface (Flask/FastAPI)
-- [ ] Multi-user support
-- [ ] Conversation export/import
-- [ ] Advanced summarization algorithms
-- [ ] Plugin system for custom memory layers
 
 ## License
 
