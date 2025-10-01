@@ -1,0 +1,67 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "MidTermMemory",
+    "type": "object",
+    "properties": {
+      "id": { "type": "string" },
+      "name": { "type": "string" },
+      "summary": { "type": "string" },
+      "project_id": { "type": "string" },
+      "timestamp": { "type": "string", "format": "date-time" },
+      "metadata": {
+        "type": "object",
+        "properties": {
+          "file_path": { "type": "string" },
+          "function_name": { "type": "string" },
+          "line_start": { "type": "integer" },
+          "line_end": { "type": "integer" },
+          "change_type": { "type": "string", "enum": ["bugfix", "feature", "refactor", "doc", "test"] },
+          "change_summary": { "type": "string" },
+          "severity": { "type": "string", "enum": ["low", "medium", "high", "critical"] },
+          "impact_scope": { "type": "string" },
+          "author": { "type": "string" },
+          "reviewer": { "type": "string" },
+          "issue_id": { "type": "string" },
+          "git_commit": { "type": "string" },
+          "branch": { "type": "string" },
+          "code_before_ref": {
+            "type": "object",
+            "properties": {
+              "code_id": { "type": "string" },
+              "code_hash": { "type": "string" },
+              "language": { "type": "string" },
+              "line_count": { "type": "integer" },
+              "snippet": { "type": "string" }
+            },
+            "required": ["code_id", "code_hash", "language"]
+          },
+          "code_after_ref": {
+            "type": "object",
+            "properties": {
+              "code_id": { "type": "string" },
+              "code_hash": { "type": "string" },
+              "language": { "type": "string" },
+              "line_count": { "type": "integer" },
+              "snippet": { "type": "string" }
+            },
+            "required": ["code_id", "code_hash", "language"]
+          },
+          "lines_added": { "type": "integer" },
+          "lines_removed": { "type": "integer" },
+          "diff_summary": { "type": "string" },
+          "references": { 
+            "type": "array", 
+            "items": { "type": "object", "properties": {
+              "stm_id": { "type": "string" },
+              "ltm_id": { "type": "string" }
+            }}
+          },
+          "embedding": { "type": "array", "items": { "type": "number" } },
+          "ttl": { "type": "integer" }
+        },
+        "required": ["change_type", "git_commit", "embedding"]
+      }
+    },
+    "required": ["id", "name", "summary", "project_id", "timestamp", "metadata"]
+  }
+  
