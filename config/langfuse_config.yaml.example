@@ -1,0 +1,61 @@
+# Langfuse Configuration Template
+# Copy this to langfuse_config.yaml and fill in your details
+
+langfuse:
+  # Langfuse Cloud (default)
+  public_key: "pk-lf-..."        # Your Langfuse public key
+  secret_key: "sk-lf-..."        # Your Langfuse secret key
+  host: "https://cloud.langfuse.com"  # Langfuse host
+  
+  # Or Self-hosted Langfuse
+  # public_key: "pk-lf-..."
+  # secret_key: "sk-lf-..."
+  # host: "http://localhost:3000"
+  
+  # Tracing settings
+  enabled: true                   # Enable/disable tracing
+  debug: false                    # Debug mode (verbose logging)
+  sample_rate: 1.0               # Sample rate (0.0 to 1.0, 1.0 = trace everything)
+  flush_at: 15                   # Flush after N events
+  flush_interval: 1.0            # Flush interval in seconds
+  
+  # What to trace
+  trace_llm_calls: true          # Trace LLM API calls
+  trace_embeddings: true         # Trace embedding generations
+  trace_retrievals: true         # Trace memory retrievals
+  trace_full_pipeline: true      # Trace entire conversation pipeline
+  
+  # Metadata
+  release: "v1.0"                # Release version
+  environment: "development"     # Environment (development, staging, production)
+  
+  # Privacy
+  mask_user_content: false       # Mask user messages in traces
+  mask_api_keys: true           # Mask API keys in logs
+
+# Example configurations:
+
+# Development (local):
+# langfuse:
+#   public_key: "pk-lf-dev-..."
+#   secret_key: "sk-lf-dev-..."
+#   host: "http://localhost:3000"
+#   enabled: true
+#   debug: true
+#   sample_rate: 1.0
+#   environment: "development"
+
+# Production (cloud):
+# langfuse:
+#   public_key: "pk-lf-prod-..."
+#   secret_key: "sk-lf-prod-..."
+#   host: "https://cloud.langfuse.com"
+#   enabled: true
+#   debug: false
+#   sample_rate: 0.1  # Sample 10% of requests
+#   environment: "production"
+#   mask_user_content: true
+
+# Disabled (for testing):
+# langfuse:
+#   enabled: false

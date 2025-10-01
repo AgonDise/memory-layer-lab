@@ -73,6 +73,41 @@ cat semantic_search_report.json
 | **`test_neo4j_connection.py`** | Connection test suite | 380 | ✅ Complete |
 | **`load_ltm_data.py`** | Data loader script | 450 | ✅ Complete |
 
+---
+
+### 📊 Observability & Tracing (Langfuse)
+
+| Document | Description | Lines | Status |
+|----------|-------------|-------|--------|
+| **[LANGFUSE_SETUP_GUIDE.md](LANGFUSE_SETUP_GUIDE.md)** | Complete Langfuse setup | - | ✅ Complete |
+| **[LANGFUSE_INTEGRATION_SUMMARY.md](LANGFUSE_INTEGRATION_SUMMARY.md)** | Integration summary | - | ✅ Complete |
+| **`utils/langfuse_client.py`** | Langfuse client wrapper | 430 | ✅ Complete |
+| **`examples/langfuse_example.py`** | Usage examples | 270 | ✅ Complete |
+| **`config/langfuse_config.yaml.example`** | Config template | - | ✅ Complete |
+
+**Key Features:**
+- LLM call tracing
+- Memory retrieval tracing
+- Full pipeline tracing
+- Performance monitoring
+- Cost tracking
+- Error tracking
+
+**Quick Commands:**
+```bash
+# Install
+pip install langfuse
+
+# Configure
+cp config/langfuse_config.yaml.example config/langfuse_config.yaml
+
+# Test
+python3 examples/langfuse_example.py
+
+# Check dashboard
+# Go to https://cloud.langfuse.com
+```
+
 **Key Features:**
 - Remote Neo4j connection
 - Connection pooling & retry
