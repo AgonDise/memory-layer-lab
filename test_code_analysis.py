@@ -64,7 +64,7 @@ class CodeAnalysisTest:
         
         # Load STM
         try:
-            with open('data/short_term_code.json', 'r', encoding='utf-8') as f:
+            with open('data/stm.json', 'r', encoding='utf-8') as f:
                 stm_data = json.load(f)
             for msg in stm_data:
                 self.stm.add(
@@ -75,12 +75,12 @@ class CodeAnalysisTest:
                 )
             print(f"   ✅ Loaded {len(stm_data)} STM messages")
         except FileNotFoundError:
-            print("   ⚠️  STM data not found. Run generate_code_analysis_data.py first")
+            print("   ⚠️  STM data not found. Run generate_data.py first")
             return False
         
         # Load MTM
         try:
-            with open('data/mid_term_code.json', 'r', encoding='utf-8') as f:
+            with open('data/mtm.json', 'r', encoding='utf-8') as f:
                 mtm_data = json.load(f)
             for chunk in mtm_data:
                 self.mtm.add_chunk(
@@ -95,7 +95,7 @@ class CodeAnalysisTest:
         
         # Load LTM
         try:
-            with open('data/long_term_code.json', 'r', encoding='utf-8') as f:
+            with open('data/ltm.json', 'r', encoding='utf-8') as f:
                 ltm_data = json.load(f)
             # Add to LTM (if method exists)
             for fact in ltm_data:
