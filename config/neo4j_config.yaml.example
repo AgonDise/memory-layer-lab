@@ -1,0 +1,44 @@
+# Neo4j Configuration Template
+# Copy this to neo4j_config.yaml and fill in your details
+
+neo4j:
+  # Connection Settings
+  uri: "bolt://YOUR_NEO4J_HOST:7687"  # Replace with your Neo4j server IP/hostname
+  username: "neo4j"                    # Default username
+  password: "YOUR_PASSWORD_HERE"       # Replace with your Neo4j password
+  database: "neo4j"                    # Database name (default: neo4j)
+  
+  # Connection Pool Settings
+  max_connection_lifetime: 3600        # Seconds (1 hour)
+  max_connection_pool_size: 50         # Max connections in pool
+  connection_acquisition_timeout: 60   # Seconds
+  encrypted: false                     # Set true for SSL/TLS
+  
+  # Retry Settings
+  max_retry_time: 30                   # Max seconds to retry
+  initial_retry_delay: 1.0             # Initial delay between retries
+  multiplier: 2.0                      # Exponential backoff multiplier
+  jitter: 0.2                          # Random jitter factor
+
+# Examples for different environments:
+
+# Local Development:
+# uri: "bolt://localhost:7687"
+# username: "neo4j"
+# password: "password"
+# database: "neo4j"
+# encrypted: false
+
+# Remote Server:
+# uri: "bolt://192.168.1.100:7687"
+# username: "neo4j"
+# password: "your-strong-password"
+# database: "memory-layer-lab"
+# encrypted: true
+
+# Cloud (Neo4j Aura):
+# uri: "neo4j+s://xxxxx.databases.neo4j.io"
+# username: "neo4j"
+# password: "your-aura-password"
+# database: "neo4j"
+# encrypted: true
