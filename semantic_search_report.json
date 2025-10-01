@@ -1,0 +1,73 @@
+{
+  "test_date": "2025-10-01T10:24:16.200290",
+  "embedding_model": "mock",
+  "summary": {
+    "avg_relevance": 9.722222222222221,
+    "avg_stm_hits": 0.0,
+    "avg_mtm_hits": 2.8333333333333335,
+    "avg_time_ms": 7.167617479960124,
+    "grade": "🔴 NEEDS IMPROVEMENT"
+  },
+  "results": [
+    {
+      "query": "Tôi làm nghề gì?",
+      "description": "Identity query - should retrieve personal info",
+      "stm_count": 0,
+      "mtm_count": 3,
+      "relevance_score": 33.33333333333333,
+      "time_ms": 31.573057174682617,
+      "found_topics": 1,
+      "total_topics": 3
+    },
+    {
+      "query": "Hướng dẫn nấu gà chiên Nhật Bản",
+      "description": "Cooking query - should retrieve cooking knowledge",
+      "stm_count": 0,
+      "mtm_count": 2,
+      "relevance_score": 0.0,
+      "time_ms": 2.527952194213867,
+      "found_topics": 0,
+      "total_topics": 4
+    },
+    {
+      "query": "Valorant tips and tricks",
+      "description": "Gaming query - should retrieve gaming knowledge",
+      "stm_count": 0,
+      "mtm_count": 3,
+      "relevance_score": 0.0,
+      "time_ms": 1.6169548034667969,
+      "found_topics": 0,
+      "total_topics": 4
+    },
+    {
+      "query": "OpenAI API pricing and usage",
+      "description": "Tech query - should retrieve tech knowledge",
+      "stm_count": 0,
+      "mtm_count": 3,
+      "relevance_score": 0.0,
+      "time_ms": 1.8618106842041016,
+      "found_topics": 0,
+      "total_topics": 4
+    },
+    {
+      "query": "Du lịch Tokyo mùa hoa anh đào",
+      "description": "Travel query - should retrieve travel knowledge",
+      "stm_count": 0,
+      "mtm_count": 3,
+      "relevance_score": 0.0,
+      "time_ms": 1.725912094116211,
+      "found_topics": 0,
+      "total_topics": 4
+    },
+    {
+      "query": "Transformer architecture in deep learning",
+      "description": "Education query - should retrieve ML knowledge",
+      "stm_count": 0,
+      "mtm_count": 3,
+      "relevance_score": 25.0,
+      "time_ms": 3.7000179290771484,
+      "found_topics": 1,
+      "total_topics": 4
+    }
+  ]
+}

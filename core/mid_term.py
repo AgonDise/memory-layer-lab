@@ -36,19 +36,24 @@ class MidTermMemory:
         self.mtm_query = mtm_query
         self.neo4j_enabled = mtm_query is not None
     
-    def add_chunk(self, summary: str, metadata: Optional[Dict[str, Any]] = None) -> None:
+    def add_chunk(self, summary: str, metadata: Optional[Dict[str, Any]] = None, embedding: Optional[List[float]] = None) -> None:
         """
         Add a new summarized chunk to mid-term memory.
         
         Args:
             summary: The summarized content
             metadata: Additional metadata (e.g., original message count, timestamps)
+            embedding: Optional embedding vector for semantic search
         """
         chunk = {
             'summary': summary,
             'timestamp': datetime.utcnow().isoformat(),
             'metadata': metadata or {}
         }
+        
+        # Add embedding if provided
+        if embedding:
+            chunk['embedding'] = embedding
         
         self.chunks.append(chunk)
         self._enforce_limits()
@@ -82,8 +87,9 @@ class MidTermMemory:
         # Search in local chunks
         if self.chunks:
             for chunk in self.chunks:
-                if 'embedding' in chunk.get('metadata', {}):
-                    chunk_embedding = chunk['metadata']['embedding']
+                # Check if embedding exists (either in chunk or metadata for backwards compatibility)
+                chunk_embedding = chunk.get('embedding') or chunk.get('metadata', {}).get('embedding')
+                if chunk_embedding:
                     similarity = self._cosine_similarity(query_embedding, chunk_embedding)
                     results.append({
                         'chunk': chunk,

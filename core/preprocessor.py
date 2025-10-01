@@ -13,16 +13,31 @@ class InputPreprocessor:
     - Embedding generation (mock or real)
     """
     
-    def __init__(self, embedding_dim: int = 384, use_mock_embeddings: bool = True):
+    def __init__(self, embedding_dim: int = 384, use_mock_embeddings: bool = True, embedding_model: Optional[Any] = None):
         """
         Initialize input preprocessor.
         
         Args:
             embedding_dim: Dimension of embedding vectors
             use_mock_embeddings: Use mock embeddings or real model
+            embedding_model: Optional pre-initialized embedding model (RealEmbeddingGenerator)
         """
         self.embedding_dim = embedding_dim
         self.use_mock_embeddings = use_mock_embeddings
+        self.embedding_model = embedding_model
+        
+        # Initialize embedding generator if not using mock and no model provided
+        if not use_mock_embeddings and embedding_model is None:
+            try:
+                from utils.real_embedding import RealEmbeddingGenerator
+                print("🔄 Initializing RealEmbeddingGenerator for InputPreprocessor...")
+                self.embedding_model = RealEmbeddingGenerator()
+                self.embedding_dim = self.embedding_model.embedding_dim
+                print(f"✅ Embedding model ready! Dimension: {self.embedding_dim}")
+            except Exception as e:
+                print(f"⚠️  Failed to load real embeddings: {e}")
+                print("   Falling back to mock embeddings")
+                self.use_mock_embeddings = True
         
         # Intent keywords mapping
         self.intent_keywords = {
@@ -122,8 +137,15 @@ class InputPreprocessor:
         if self.use_mock_embeddings:
             return self._mock_embedding(text)
         else:
-            # TODO: Use real embedding model (sentence-transformers, OpenAI, etc.)
-            return self._mock_embedding(text)
+            # Use real embedding model
+            if self.embedding_model:
+                try:
+                    return self.embedding_model.generate(text)
+                except Exception as e:
+                    print(f"⚠️  Embedding generation failed: {e}, using mock")
+                    return self._mock_embedding(text)
+            else:
+                return self._mock_embedding(text)
     
     def _mock_embedding(self, text: str) -> List[float]:
         """
