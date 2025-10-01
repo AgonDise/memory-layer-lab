@@ -1,42 +1,151 @@
 {
     "$schema": "http://json-schema.org/draft-07/schema#",
     "title": "LongTermMemory",
+    "description": "Hybrid LTM schema combining VectorDB (semantic search) and Knowledge Graph (structural relationships)",
     "type": "object",
     "properties": {
-      "id": { "type": "string" },
-      "content": { "type": "string" },
-      "project_id": { "type": "string" },
+      "id": { 
+        "type": "string",
+        "description": "Unique identifier (also serves as vector_id in VectorDB)"
+      },
+      "content": { 
+        "type": "string",
+        "description": "Full text content stored in VectorDB"
+      },
+      "project_id": { 
+        "type": "string",
+        "description": "Project identifier for multi-tenant support"
+      },
       "metadata": {
         "type": "object",
+        "description": "Metadata stored in both VectorDB and Knowledge Graph",
         "properties": {
-          "file_path": { "type": "string" },
-          "function_name": { "type": "string" },
-          "category": { "type": "string", "enum": ["function", "module", "commit_log", "guideline", "architecture"] },
-          "module": { "type": "string" },
-          "author": { "type": "string" },
-          "reviewer": { "type": "string" },
-          "git_commit": { "type": "string" },
-          "issue_id": { "type": "string" },
-          "created_at": { "type": "string", "format": "date-time" },
-          "last_accessed": { "type": "string", "format": "date-time" },
-          "importance": { "type": "string", "enum": ["low", "medium", "high", "critical"] },
+          "category": { 
+            "type": "string", 
+            "enum": ["function", "module", "commit_log", "guideline", "architecture"],
+            "description": "Entity type, determines graph node label"
+          },
+          "embedding": { 
+            "type": "array", 
+            "items": { "type": "number" },
+            "description": "Vector embedding for semantic search (384 or 768 dimensions)"
+          },
+          "graph_entity_id": {
+            "type": "string",
+            "description": "Reference to corresponding node ID in Knowledge Graph (bidirectional link)"
+          },
+          "file_path": { 
+            "type": "string",
+            "description": "Source file path"
+          },
+          "function_name": { 
+            "type": "string",
+            "description": "Function or method name (for category=function)"
+          },
+          "module": { 
+            "type": "string",
+            "description": "Module or package name"
+          },
+          "line_start": { 
+            "type": "integer",
+            "description": "Starting line number in source file"
+          },
+          "line_end": { 
+            "type": "integer",
+            "description": "Ending line number in source file"
+          },
+          "author": { 
+            "type": "string",
+            "description": "Author name (for commits, code changes)"
+          },
+          "reviewer": { 
+            "type": "string",
+            "description": "Reviewer name"
+          },
+          "git_commit": { 
+            "type": "string",
+            "description": "Git commit hash (for category=commit_log)"
+          },
+          "issue_id": { 
+            "type": "string",
+            "description": "Related issue or bug ID"
+          },
+          "created_at": { 
+            "type": "string", 
+            "format": "date-time",
+            "description": "Creation timestamp"
+          },
+          "last_accessed": { 
+            "type": "string", 
+            "format": "date-time",
+            "description": "Last access timestamp for TTL management"
+          },
+          "importance": { 
+            "type": "string", 
+            "enum": ["low", "medium", "high", "critical"],
+            "description": "Importance level affecting retention and retrieval priority"
+          },
+          "tags": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "Tags for categorization and filtering"
+          },
           "graph_links": {
             "type": "array",
+            "description": "Relationships to create in Knowledge Graph",
             "items": {
               "type": "object",
               "properties": {
-                "type": { "type": "string" },
-                "target": { "type": "string" }
+                "type": { 
+                  "type": "string",
+                  "description": "Relationship type (e.g., CALLS, MODIFIES, BELONGS_TO, FIXES, AFFECTS)"
+                },
+                "target": { 
+                  "type": "string",
+                  "description": "Target entity ID in Knowledge Graph"
+                },
+                "properties": {
+                  "type": "object",
+                  "description": "Optional properties for the relationship"
+                }
               },
               "required": ["type", "target"]
             }
           },
-          "embedding": { "type": "array", "items": { "type": "number" } },
-          "ttl": { "type": ["string", "integer"] }
+          "ttl": { 
+            "type": ["string", "integer"],
+            "description": "Time-to-live in seconds or ISO duration"
+          },
+          "vector_db_metadata": {
+            "type": "object",
+            "description": "Additional metadata specific to VectorDB storage",
+            "properties": {
+              "index_name": { "type": "string" },
+              "distance_metric": { "type": "string", "enum": ["cosine", "euclidean", "dot_product"] }
+            }
+          },
+          "graph_db_metadata": {
+            "type": "object",
+            "description": "Additional metadata specific to Knowledge Graph storage",
+            "properties": {
+              "node_label": { "type": "string", "description": "Primary node label (Function, Commit, Module, etc.)" },
+              "additional_labels": { 
+                "type": "array", 
+                "items": { "type": "string" },
+                "description": "Secondary node labels"
+              },
+              "indexed_properties": {
+                "type": "array",
+                "items": { "type": "string" },
+                "description": "Properties to index in graph for fast lookup"
+              }
+            }
+          }
         },
         "required": ["category", "embedding"]
       }
     },
-    "required": ["id", "content", "project_id", "metadata"]
+    "required": ["id", "content", "project_id", "metadata"],
+    "additionalProperties": false
   }
   

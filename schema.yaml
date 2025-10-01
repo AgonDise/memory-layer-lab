@@ -27,54 +27,181 @@ mid_term:
 # Schema documentation:
 # id: string, text: string, embedding: float[], metadata: {file, function, source, commit?, timestamp}
 
+# ========================================
+# HYBRID LONG-TERM MEMORY (LTM)
+# Architecture: VectorDB + Knowledge Graph
+# ========================================
+#
+# Design Philosophy:
+# - VectorDB: Semantic search via embeddings (fuzzy, broad recall)
+# - Knowledge Graph: Structured relationships (precise, relational queries)
+# - Hybrid: Bidirectional links maintain consistency
+#
+# Query Strategies:
+# 1. VECTOR_FIRST: Semantic search → Graph expansion (broad to specific)
+# 2. GRAPH_FIRST: Graph query → Vector enrichment (specific to detailed)
+# 3. PARALLEL: Both simultaneously (complex queries)
+# 4. VECTOR_ONLY: Pure semantic search
+# 5. GRAPH_ONLY: Pure structural query
+
 long_term:
+  # ==========================================
+  # KNOWLEDGE GRAPH COMPONENT (Neo4j)
+  # Purpose: Structural relationships, precise queries
+  # ==========================================
   graph:
     nodes:
-      - id: "f1"
+      # Function node with vector link
+      - id: "func_login_user"
         label: "Function"
         name: "login_user"
-      - id: "c1"
+        file_path: "auth_service.py"
+        line_start: 45
+        line_end: 68
+        vector_id: "vec_001"  # ← Bidirectional link to VectorDB
+        description: "Handles user authentication and JWT token generation"
+        
+      # Class node
+      - id: "class_UserManager"
         label: "Class"
         name: "UserManager"
-      - id: "g1"
+        file_path: "auth_service.py"
+        vector_id: "vec_002"
+        
+      # Commit node with vector link
+      - id: "commit_abc123"
         label: "Commit"
         hash: "abc123"
         message: "Fix bug in login_user"
+        author: "John Doe"
         timestamp: "2025-09-18T08:30:00Z"
+        vector_id: "vec_003"  # Full commit content in VectorDB
+        
+      # Module node
+      - id: "module_auth"
+        label: "Module"
+        name: "auth_service"
+        path: "auth_service.py"
+        vector_id: "vec_004"
+        
     edges:
-      - from: "c1"
-        to: "f1"
-        type: "HAS_FUNCTION"
-      - from: "g1"
-        to: "f1"
+      # Relationship examples
+      - from: "class_UserManager"
+        to: "func_login_user"
+        type: "HAS_METHOD"
+        
+      - from: "commit_abc123"
+        to: "func_login_user"
         type: "MODIFIES"
+        properties:
+          lines_changed: 5
+          change_type: "bugfix"
+          
+      - from: "func_login_user"
+        to: "module_auth"
+        type: "BELONGS_TO"
 
-  # Schema documentation:
+  # Schema documentation for graph:
   # nodes:
-  #   - id: string
-  #     label: string (Function | Class | Module | Commit | Doc)
+  #   - id: string (unique identifier)
+  #     label: string (Function | Class | Module | Commit | Bug | Doc)
+  #     vector_id: string (link to VectorDB entry)
+  #     ... (label-specific properties)
   # edges:
-  #   - from: string, to: string, type: string
+  #   - from: string, to: string
+  #     type: string (CALLS | MODIFIES | BELONGS_TO | FIXES | AFFECTS | HAS_METHOD | etc.)
+  #     properties?: object (optional edge metadata)
 
-long_term:
+  # ==========================================
+  # VECTOR DATABASE COMPONENT (FAISS/ChromaDB)
+  # Purpose: Semantic search, full content storage
+  # ==========================================
   vector:
-    - id: "kb_001"
-      text: "Spec của Innocody Engine: Short-term dùng sliding buffer..."
-      embedding: [0.12, 0.88, -0.33, ...]
+    # Entry 1: Function content with graph link
+    - id: "vec_001"
+      content: "def login_user(username, password): Authenticates user credentials, validates against database, generates JWT token with 24h expiry. Raises AuthenticationError on invalid credentials."
+      embedding: [0.12, 0.88, -0.33, ...]  # 384 or 768 dimensions
+      project_id: "innocody-demo"
       metadata:
-        source: "documentation"
-        topic: "memory_layer"
-        timestamp: "2025-09-10T09:00:00Z"
+        category: "function"
+        graph_entity_id: "func_login_user"  # ← Bidirectional link to Graph
+        function_name: "login_user"
+        file_path: "auth_service.py"
+        module: "auth_service"
+        line_start: 45
+        line_end: 68
+        tags: ["authentication", "security", "jwt"]
+        importance: "high"
+        created_at: "2025-09-10T09:00:00Z"
+        last_accessed: "2025-10-01T14:00:00Z"
 
-    - id: "conv_010"
-      text: "Trong commit abc123, login_user được sửa để thêm OAuth2."
+    # Entry 2: Commit content with graph link
+    - id: "vec_003"
+      content: "Fixed critical authentication bug in login_user. Issue: JWT tokens were not properly validated for expiry. Solution: Added token expiration check before authentication. Impact: Resolves security vulnerability #242."
       embedding: [0.33, 0.22, -0.41, ...]
+      project_id: "innocody-demo"
       metadata:
-        source: "conversation"
-        file: "auth_service.py"
-        function: "login_user"
-        commit: "abc123"
-        timestamp: "2025-09-20T10:15:00Z"
+        category: "commit_log"
+        graph_entity_id: "commit_abc123"  # ← Link to graph commit node
+        git_commit: "abc123"
+        author: "John Doe"
+        file_path: "auth_service.py"
+        issue_id: "#242"
+        tags: ["bugfix", "security", "authentication"]
+        importance: "critical"
+        created_at: "2025-09-18T08:30:00Z"
+        graph_links:  # Relationships to create in graph
+          - type: "MODIFIES"
+            target: "func_login_user"
+          - type: "FIXES"
+            target: "bug_242"
 
-# Schema documentation:
-# id: string, text: string, embedding: float[], metadata: {source, file?, function?, commit?, topic?, timestamp}
+    # Entry 3: Documentation/knowledge
+    - id: "vec_100"
+      content: "Innocody Engine Memory Layer Specification: Long-term memory uses hybrid architecture combining VectorDB for semantic search and Knowledge Graph for structural relationships. This enables both fuzzy semantic queries and precise relational traversals."
+      embedding: [0.45, 0.67, -0.12, ...]
+      project_id: "innocody-demo"
+      metadata:
+        category: "architecture"
+        graph_entity_id: "doc_memory_spec"
+        tags: ["documentation", "architecture", "memory-layer"]
+        importance: "high"
+        created_at: "2025-09-10T09:00:00Z"
+
+# Schema documentation for vector:
+# - id: string (vector entry ID, referenced by graph nodes)
+# - content: string (full text content for semantic search)
+# - embedding: float[] (384 or 768 dimensions, generated by embedding model)
+# - project_id: string (multi-tenant support)
+# - metadata:
+#     - category: enum (function | module | commit_log | guideline | architecture)
+#     - graph_entity_id: string (bidirectional link to graph node)
+#     - graph_links: array of {type, target} (relationships to create in graph)
+#     - tags: string[] (for filtering)
+#     - importance: enum (low | medium | high | critical)
+#     - created_at, last_accessed: ISO8601 timestamps
+#     - ... (category-specific fields)
+
+# ==========================================
+# HYBRID QUERY EXAMPLES
+# ==========================================
+# 
+# Example 1 - Vector First (Semantic → Structural):
+#   Query: "functions related to authentication"
+#   1. VectorDB searches embeddings → finds vec_001 (login_user)
+#   2. Extract graph_entity_id → "func_login_user"
+#   3. Graph expands relationships → finds callers, commits, bugs
+#   Result: Semantic matches + structural context
+#
+# Example 2 - Graph First (Structural → Semantic):
+#   Query: "commits by John Doe"
+#   1. Graph queries author="John Doe" → finds commit_abc123
+#   2. Extract vector_id → "vec_003"
+#   3. VectorDB fetches full content
+#   Result: Precise graph match + rich content
+#
+# Example 3 - Parallel (Complex query):
+#   Query: "how was the authentication bug fixed"
+#   1. VectorDB semantic search + Graph structural query (parallel)
+#   2. Merge results by matching graph_entity_id ↔ vector_id
+#   Result: Best of both approaches
