@@ -4,11 +4,18 @@ Utility modules for the Memory Layer Lab.
 
 from .logger import setup_logger
 from .storage import MemoryStorage
-from .embedding_utils import (
-    FakeEmbeddingGenerator,
-    EmbeddingCache,
-    get_embedder
-)
+
+# Embedding utils - only import if needed to avoid numpy dependency
+try:
+    from .embedding_utils import (
+        FakeEmbeddingGenerator,
+        EmbeddingCache,
+        get_embedder
+    )
+except ImportError:
+    FakeEmbeddingGenerator = None
+    EmbeddingCache = None
+    get_embedder = None
 
 # Try to import improved embedding generator
 try:
@@ -19,13 +26,22 @@ except ImportError:
 
 # Keep old name for backwards compatibility
 RealEmbeddingGenerator = ImprovedEmbeddingGenerator
-from .llm_client import (
-    LLMClient,
-    OpenAIClient,
-    AnthropicClient,
-    MockLLMClient,
-    get_llm_client
-)
+
+# LLM clients
+try:
+    from .llm_client import (
+        LLMClient,
+        OpenAIClient,
+        AnthropicClient,
+        MockLLMClient,
+        get_llm_client
+    )
+except ImportError:
+    LLMClient = None
+    OpenAIClient = None
+    AnthropicClient = None
+    MockLLMClient = None
+    get_llm_client = None
 
 __all__ = [
     'setup_logger',

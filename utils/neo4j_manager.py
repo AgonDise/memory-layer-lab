@@ -7,6 +7,7 @@ import time
 import logging
 from neo4j import GraphDatabase, Driver, Session
 from neo4j.exceptions import ServiceUnavailable, AuthError, SessionExpired
+from utils.env_loader import get_config
 
 logger = logging.getLogger(__name__)
 
@@ -360,3 +361,32 @@ class Neo4jManager:
     def __repr__(self):
         status = "connected" if self._connected else "disconnected"
         return f"Neo4jManager(uri='{self.uri}', database='{self.database}', status='{status}')"
+
+
+def create_neo4j_manager_from_env() -> Neo4jManager:
+    """
+    Create Neo4jManager from environment variables.
+    
+    Returns:
+        Configured Neo4jManager instance
+        
+    Raises:
+        ValueError: If required environment variables not set
+    """
+    config = get_config()
+    
+    if not config.neo4j_uri:
+        raise ValueError("NEO4J_URI not set in environment")
+    if not config.neo4j_user:
+        raise ValueError("NEO4J_USER not set in environment")
+    if not config.neo4j_password:
+        raise ValueError("NEO4J_PASSWORD not set in environment")
+    
+    return Neo4jManager(
+        uri=config.neo4j_uri,
+        username=config.neo4j_user,
+        password=config.neo4j_password,
+        database=config.neo4j_database,
+        max_connection_lifetime=int(get_config().env_vars.get('NEO4J_MAX_CONNECTION_LIFETIME', 3600)),
+        connection_acquisition_timeout=config.neo4j_timeout
+    )
